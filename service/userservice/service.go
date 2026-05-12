@@ -12,6 +12,10 @@ type Repository interface {
 	Register(u entity.User) (entity.User, error)
 }
 
+func New(repo Repository) *Service {
+	return &Service{Repo: repo}
+}
+
 type Service struct {
 	Repo Repository
 }
