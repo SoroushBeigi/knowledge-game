@@ -3,10 +3,12 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 type MySQLDB struct {
@@ -14,6 +16,11 @@ type MySQLDB struct {
 }
 
 func New() *MySQLDB {
+
+	envErr := godotenv.Load(".env")
+	if envErr != nil {
+		log.Fatal(envErr)
+	}
 
 	dbName := os.Getenv("MYSQL_DATABASE")
 	dbUser := os.Getenv("MYSQL_USER")
