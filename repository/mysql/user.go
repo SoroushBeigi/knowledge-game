@@ -12,7 +12,7 @@ func (db MySQLDB) IsPhoneNumberUnique(pn string) (bool, error) {
 	user := entity.User{}
 	var createdAt []uint8
 	row := db.db.QueryRow(`SELECT * FROM users WHERE phone_number = ?`, pn)
-	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &createdAt)
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &createdAt)
 
 	if err == sql.ErrNoRows {
 		return true, nil
@@ -28,7 +28,7 @@ func (db MySQLDB) IsPhoneNumberUnique(pn string) (bool, error) {
 }
 
 func (db MySQLDB) Register(u entity.User) (entity.User, error) {
-	res, err := db.db.Exec(`INSERT INTO users(name,phone_number) VALUES(?, ? )`, u.Name, u.PhoneNumber)
+	res, err := db.db.Exec(`INSERT INTO users(name,phone_number,password) VALUES(?, ?, ?)`, u.Name, u.PhoneNumber, u.Password)
 	if err != nil {
 		log.Printf("DB ERROR: %v", err)
 		return entity.User{}, fmt.Errorf("Database Error!")

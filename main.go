@@ -54,8 +54,10 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-
-	fmt.Fprintf(w, `{"message": "user created successfully","user":%v}`, user)
+	
+	userJson, _ := json.Marshal(user)
+	userJsonRaw := userJson[1 : len(userJson)-1]
+	fmt.Fprintf(w, `{"message": "user created successfully", %v}`, string(userJsonRaw))
 }
 
 func mainTestDB() {

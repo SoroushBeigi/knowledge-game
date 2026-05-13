@@ -5,6 +5,7 @@ import (
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
@@ -21,8 +22,9 @@ type Service struct {
 }
 
 type RegisterRequest struct {
-	Name        string
-	PhoneNumber string
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
 }
 
 type RegisterResponse struct {
@@ -50,10 +52,20 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		return RegisterResponse{}, fmt.Errorf("name should be at least 2 characters")
 	}
 
+	if len(req.Password) < 8 {
+		return RegisterResponse{}, fmt.Errorf("password should be at least 8 characters")
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
+	if err != nil {
+		return RegisterResponse{}, fmt.Errorf("password should be less than 72 characters")
+	}
+
 	user := entity.User{
 		ID:          0,
 		PhoneNumber: req.PhoneNumber,
 		Name:        req.Name,
+		Password:    string(passwordHash),
 	}
 
 	createdUser, err := s.Repo.Register(user)
@@ -63,4 +75,16 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	return RegisterResponse{User: createdUser}, nil
 
+}
+
+type LoginRequest struct {
+	PhoneNumber string `json:"phone_number"`
+	Password    string `json:"password"`
+}
+
+type LoginResponse struct {
+}
+
+func (s Service) Login(req LoginRequest) (LoginResponse, error) {
+	panic("s")
 }
