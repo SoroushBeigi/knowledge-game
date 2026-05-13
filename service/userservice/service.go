@@ -1,7 +1,9 @@
 package userservice
 
 import (
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
@@ -11,6 +13,7 @@ import (
 type Repository interface {
 	IsPhoneNumberUnique(pn string) (bool, error)
 	Register(u entity.User) (entity.User, error)
+	GetUserByPhoneNumber(pn string) (entity.User, error)
 }
 
 func New(repo Repository) *Service {
@@ -86,5 +89,19 @@ type LoginResponse struct {
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
-	panic("s")
+	var defaultErr = errors.New("Phone number and password combination didn't work")
+
+	user, err := s.Repo.GetUserByPhoneNumber(req.PhoneNumber)
+
+	if err != nil {
+		log.Println("Service Login:", err)
+
+		return LoginResponse{}, defaultErr
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+		return LoginResponse{}, defaultErr
+	}
+
+	return LoginResponse{}, nil
 }

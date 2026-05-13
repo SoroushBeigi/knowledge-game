@@ -39,3 +39,17 @@ func (db MySQLDB) Register(u entity.User) (entity.User, error) {
 
 	return u, nil
 }
+
+func (db MySQLDB) GetUserByPhoneNumber(pn string) (entity.User, error) {
+	user := entity.User{}
+	var createdAt []uint8
+	row := db.db.QueryRow(`SELECT * FROM users WHERE phone_number = ?`, pn)
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &createdAt)
+
+	if err != nil {
+		log.Printf("DB Error IsPhoneNumberUnique: %v\n", err)
+		return entity.User{}, fmt.Errorf("Error reading from Database")
+	}
+
+	return user, nil
+}
