@@ -14,6 +14,7 @@ type Repository interface {
 	IsPhoneNumberUnique(pn string) (bool, error)
 	Register(u entity.User) (entity.User, error)
 	GetUserByPhoneNumber(pn string) (entity.User, error)
+	GetUserByID(id uint) (entity.User, error)
 }
 
 func New(repo Repository) *Service {
@@ -104,4 +105,23 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	}
 
 	return LoginResponse{}, nil
+}
+
+type GetProfileRequest struct {
+	UserID uint
+}
+
+type GetProfileResponse struct {
+	Name string `json:"name"`
+}
+
+func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
+	user, err := s.Repo.GetUserByID(req.UserID)
+	if err != nil {
+		log.Println("Service Login:", err)
+
+		return GetProfileResponse{}, errors.New("unexpected error")
+	}
+
+	return GetProfileResponse{Name: user.Name}, nil
 }

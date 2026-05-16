@@ -14,6 +14,7 @@ import (
 
 func main() {
 	http.HandleFunc("/users/register", handleRegister)
+	http.HandleFunc("/users/login", handleLogin)
 	server := http.Server{Addr: ":8080"}
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
@@ -54,10 +55,48 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	
+
 	userJson, _ := json.Marshal(user)
 	userJsonRaw := userJson[1 : len(userJson)-1]
 	fmt.Fprintf(w, `{"message": "user created successfully", %v}`, string(userJsonRaw))
+}
+
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Fprintf(w, `"error":"invalid method"`)
+
+		return
+	}
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.Write([]byte(`{"error": "could not read"}`))
+		log.Println(err.Error())
+
+		return
+	}
+
+	var lReq userservice.LoginRequest
+
+	err = json.Unmarshal(data, &lReq)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
+		log.Println(err.Error())
+
+		return
+	}
+
+	mysqlRepo := mysql.New()
+	uService := userservice.New(mysqlRepo)
+	_, err = uService.Login(lReq)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
+		log.Println(err.Error())
+
+		return
+	}
+
+	fmt.Fprintf(w, `{"message": "login success!", %v}`)
 }
 
 func mainTestDB() {
