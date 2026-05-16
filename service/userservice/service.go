@@ -108,7 +108,7 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 }
 
 type GetProfileRequest struct {
-	UserID uint
+	UserID uint `json:"id"`
 }
 
 type GetProfileResponse struct {
@@ -118,9 +118,9 @@ type GetProfileResponse struct {
 func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
 	user, err := s.Repo.GetUserByID(req.UserID)
 	if err != nil {
-		log.Println("Service Login:", err)
+		log.Println("Service Profile:", err)
 
-		return GetProfileResponse{}, errors.New("unexpected error")
+		return GetProfileResponse{}, err
 	}
 
 	return GetProfileResponse{Name: user.Name}, nil
