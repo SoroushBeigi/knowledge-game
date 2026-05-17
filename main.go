@@ -6,10 +6,13 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 )
 
@@ -122,28 +125,17 @@ func handleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := io.ReadAll(r.Body)
+	auth := r.Header.Get("Authorization")
+	claims, err := pareseJWT(auth)
+
 	if err != nil {
-		w.Write([]byte(`{"error": "could not read"}`))
-		log.Println(err.Error())
-
-		return
-	}
-
-	var pReq userservice.GetProfileRequest
-
-	err = json.Unmarshal(data, &pReq)
-	if err != nil {
-		w.Write([]byte(`{"error": "error reading input"}`))
-		log.Println(err.Error())
-
-		return
+		fmt.Fprintf(w, `"error":"invalid token "`)
 	}
 
 	mysqlRepo := mysql.New()
 	userSvc := userservice.New(mysqlRepo)
 
-	profile, err := userSvc.GetProfile(pReq)
+	profile, err := userSvc.GetProfile(userservice.GetProfileRequest{UserID: claims.UserID})
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
 		log.Println(err.Error())
@@ -151,7 +143,7 @@ func handleProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err = json.Marshal(profile)
+	data, err := json.Marshal(profile)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
 		log.Println(err.Error())
@@ -172,4 +164,23 @@ func mainTestDB() {
 
 	isUnique, err := mysqlRepo.IsPhoneNumberUnique("09010101")
 	fmt.Println(isUnique, err)
+}
+
+func pareseJWT(tokenStr string) (*userservice.Claims, error) {
+	signKey := os.Getenv("SIGN_SECRET")
+
+	tokenStr = strings.Replace(tokenStr, "Bearer ", "", 1)
+
+	token, err := jwt.ParseWithClaims(tokenStr, &userservice.Claims{}, func(t *jwt.Token) (any, error) {
+		return []byte(signKey), nil
+	})
+
+	if claims, ok := token.Claims.(*userservice.Claims); ok && token.Valid {
+		log.Printf("userID: %v, expires at: %v\n", claims.UserID, claims.ExpiresAt)
+		return claims, nil
+	} else {
+		log.Println("error while parsing JWT")
+		return nil, err
+	}
+
 }

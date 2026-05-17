@@ -103,7 +103,7 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	if err != nil {
 		log.Println("Service Login:", err)
 
-		return LoginResponse{}, defaultErr
+		return LoginResponse{}, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
@@ -142,6 +142,15 @@ func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID uint
+}
+
+func (c Claims) Validate() error {
+	if c.UserID < 1 {
+
+		return errors.New("missing or invalid user id")
+	}
+
+	return nil
 }
 
 func createToken(userID uint, signKey string) (string, error) {
