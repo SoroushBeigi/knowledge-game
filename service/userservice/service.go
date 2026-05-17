@@ -4,9 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,11 +21,13 @@ type Repository interface {
 }
 
 func New(repo Repository) *Service {
-	return &Service{Repo: repo}
+	signKey := os.Getenv("SIGN_SECRET")
+	return &Service{repo: repo, signKey: signKey}
 }
 
 type Service struct {
-	Repo Repository
+	repo    Repository
+	signKey string
 }
 
 type RegisterRequest struct {
@@ -40,7 +45,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		return RegisterResponse{}, fmt.Errorf("phone number is not valid: %v", req.PhoneNumber)
 	}
 
-	if isUnique, err := s.Repo.IsPhoneNumberUnique(req.PhoneNumber); err != nil || !isUnique {
+	if isUnique, err := s.repo.IsPhoneNumberUnique(req.PhoneNumber); err != nil || !isUnique {
 		if err != nil {
 
 			return RegisterResponse{}, fmt.Errorf("unexpected error happened")
@@ -72,7 +77,7 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		Password:    string(passwordHash),
 	}
 
-	createdUser, err := s.Repo.Register(user)
+	createdUser, err := s.repo.Register(user)
 	if err != nil {
 		return RegisterResponse{}, fmt.Errorf("unexpected error happened")
 	}
@@ -87,12 +92,13 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
+	AccessToken string `json:"access_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	var defaultErr = errors.New("Phone number and password combination didn't work")
 
-	user, err := s.Repo.GetUserByPhoneNumber(req.PhoneNumber)
+	user, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
 
 	if err != nil {
 		log.Println("Service Login:", err)
@@ -104,7 +110,14 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, defaultErr
 	}
 
-	return LoginResponse{}, nil
+	token, err := createToken(user.ID, s.signKey)
+	if err != nil {
+		log.Println("Service Login, createToken ", err)
+
+		return LoginResponse{}, defaultErr
+	}
+
+	return LoginResponse{AccessToken: token}, nil
 }
 
 type GetProfileRequest struct {
@@ -116,7 +129,7 @@ type GetProfileResponse struct {
 }
 
 func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
-	user, err := s.Repo.GetUserByID(req.UserID)
+	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
 		log.Println("Service Profile:", err)
 
@@ -124,4 +137,26 @@ func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
 	}
 
 	return GetProfileResponse{Name: user.Name}, nil
+}
+
+type Claims struct {
+	jwt.RegisteredClaims
+	UserID uint
+}
+
+func createToken(userID uint, signKey string) (string, error) {
+
+	claims := Claims{
+		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24))},
+		UserID:           userID,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenStr, err := token.SignedString([]byte(signKey))
+	if err != nil {
+		return "", err
+	}
+
+	return tokenStr, nil
+
 }

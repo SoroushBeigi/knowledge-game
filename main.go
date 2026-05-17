@@ -10,9 +10,16 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	envErr := godotenv.Load(".env")
+	if envErr != nil {
+		log.Fatal(envErr)
+	}
+
 	http.HandleFunc("/users/register", handleRegister)
 	http.HandleFunc("/users/login", handleLogin)
 	http.HandleFunc("/users/profile", handleProfile)
@@ -89,7 +96,7 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	mysqlRepo := mysql.New()
 	uService := userservice.New(mysqlRepo)
-	_, err = uService.Login(lReq)
+	resp, err := uService.Login(lReq)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
 		log.Println(err.Error())
@@ -97,7 +104,15 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, `{"message": "login success!", %v}`)
+	data, err = json.Marshal(resp)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error": %s}`, err.Error())))
+		log.Println(err.Error())
+
+		return
+	}
+
+	fmt.Fprintf(w, "%s", string(data))
 }
 
 func handleProfile(w http.ResponseWriter, r *http.Request) {
