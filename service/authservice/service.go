@@ -3,15 +3,12 @@ package authservice
 import (
 	"errors"
 	"log"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/golang-jwt/jwt/v5"
 )
-
-
 
 type AuthParser interface {
 	ParseToken(tokenStr string) (*Claims, error)
@@ -31,34 +28,30 @@ func (c Claims) Validate() error {
 	return nil
 }
 
+type Config struct {
+	SignKey           string
+	AccessExpireTime  time.Duration
+	RefreshExpireTime time.Duration
+	AccessSubject     string
+	RefreshSubject    string
+}
 type Service struct {
-	signKey           string
-	accessExpireTime  time.Duration
-	refreshExpireTime time.Duration
-	accessSubject     string
-	refreshSubject    string
+	config Config
 }
 
-func New(accessSubject, refreshSubject string,
-	accessExpireTime, refreshExpireTime time.Duration) *Service {
-
-	signKey := os.Getenv("SIGN_SECRET")
+func New(config Config) *Service {
 
 	return &Service{
-		signKey:           signKey,
-		accessSubject:     accessSubject,
-		refreshSubject:    refreshSubject,
-		accessExpireTime:  accessExpireTime,
-		refreshExpireTime: refreshExpireTime,
+		config: config,
 	}
 }
 
 func (s Service) CreateAccessToken(user entity.User) (string, error) {
-	return s.createToken(user.ID, s.accessExpireTime, s.accessSubject)
+	return s.createToken(user.ID, s.config.AccessExpireTime, s.config.AccessSubject)
 }
 
 func (s Service) CreateRefreshToken(user entity.User) (string, error) {
-	return s.createToken(user.ID, s.refreshExpireTime, s.refreshSubject)
+	return s.createToken(user.ID, s.config.RefreshExpireTime, s.config.RefreshSubject)
 }
 
 func (s Service) ParseToken(tokenStr string) (*Claims, error) {
@@ -66,7 +59,7 @@ func (s Service) ParseToken(tokenStr string) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
 
-		return []byte(s.signKey), nil
+		return []byte(s.config.SignKey), nil
 	})
 
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
@@ -93,7 +86,7 @@ func (s Service) createToken(userID uint, expireDuration time.Duration, subject 
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(s.signKey))
+	tokenStr, err := token.SignedString([]byte(s.config.SignKey))
 	if err != nil {
 
 		return "", err

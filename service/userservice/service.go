@@ -37,8 +37,14 @@ type RegisterRequest struct {
 	Password    string `json:"password"`
 }
 
+type RegisterResponseUser struct {
+	ID          uint   `json:"id"`
+	PhoneNumber string `json:"phone_number"`
+	Name        string `json:"name"`
+}
+
 type RegisterResponse struct {
-	User entity.User
+	User RegisterResponseUser `json:"user"`
 }
 
 func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
@@ -83,7 +89,11 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		return RegisterResponse{}, fmt.Errorf("unexpected error happened")
 	}
 
-	return RegisterResponse{User: createdUser}, nil
+	return RegisterResponse{User: RegisterResponseUser{
+		ID:          createdUser.ID,
+		PhoneNumber: createdUser.PhoneNumber,
+		Name:        createdUser.Name,
+	}}, nil
 
 }
 
