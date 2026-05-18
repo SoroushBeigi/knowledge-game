@@ -4,12 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
-	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,14 +17,18 @@ type Repository interface {
 	GetUserByID(id uint) (entity.User, error)
 }
 
-func New(repo Repository) *Service {
-	signKey := os.Getenv("SIGN_SECRET")
-	return &Service{repo: repo, signKey: signKey}
+type AuthGenerator interface {
+	CreateAccessToken(user entity.User) (string, error)
+	CreateRefreshToken(user entity.User) (string, error)
+}
+
+func New(repo Repository, auth AuthGenerator) *Service {
+	return &Service{repo: repo, auth: auth}
 }
 
 type Service struct {
-	repo    Repository
-	signKey string
+	auth AuthGenerator
+	repo Repository
 }
 
 type RegisterRequest struct {
@@ -92,7 +93,8 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -110,14 +112,21 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, defaultErr
 	}
 
-	token, err := createToken(user.ID, s.signKey)
+	aToken, err := s.auth.CreateAccessToken(user)
 	if err != nil {
 		log.Println("Service Login, createToken ", err)
 
 		return LoginResponse{}, defaultErr
 	}
 
-	return LoginResponse{AccessToken: token}, nil
+	rToken, err := s.auth.CreateRefreshToken(user)
+	if err != nil {
+		log.Println("Service Login, createToken ", err)
+
+		return LoginResponse{}, defaultErr
+	}
+
+	return LoginResponse{AccessToken: aToken, RefreshToken: rToken}, nil
 }
 
 type GetProfileRequest struct {
@@ -137,35 +146,4 @@ func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
 	}
 
 	return GetProfileResponse{Name: user.Name}, nil
-}
-
-type Claims struct {
-	jwt.RegisteredClaims
-	UserID uint
-}
-
-func (c Claims) Validate() error {
-	if c.UserID < 1 {
-
-		return errors.New("missing or invalid user id")
-	}
-
-	return nil
-}
-
-func createToken(userID uint, signKey string) (string, error) {
-
-	claims := Claims{
-		RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24))},
-		UserID:           userID,
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenStr, err := token.SignedString([]byte(signKey))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenStr, nil
-
 }
