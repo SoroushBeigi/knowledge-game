@@ -31,8 +31,12 @@ func (s Server) Serve() {
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	e.POST("/users/register", s.userRegister)
+	uGroup:= e.Group("/users")
 
+	uGroup.POST("/register", s.userRegister)
+	uGroup.POST("/login", s.userLogin)
+	uGroup.GET("/profile", s.userProfile)
+	
 	log.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
 
 }
