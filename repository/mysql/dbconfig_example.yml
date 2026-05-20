@@ -1,0 +1,5 @@
+production:
+  dialect: mysql
+  datasource: #replace with your own data username:password@(localhost:3308)/dbName?parseTime=true
+  dir: migrations
+  table: migrations
