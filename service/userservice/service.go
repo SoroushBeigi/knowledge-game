@@ -7,6 +7,7 @@ import (
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
+	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -109,6 +110,7 @@ type LoginResponse struct {
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
+	const op = "userservice.Login"
 	var defaultErr = errors.New("Phone number and password combination didn't work")
 
 	user, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
@@ -116,7 +118,10 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	if err != nil {
 		log.Println("Service Login:", err)
 
-		return LoginResponse{}, err
+		return LoginResponse{},
+			richerror.New(op).
+				WithErr(err).
+				WithMetaData(map[string]any{"phone_number": req.PhoneNumber})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
@@ -156,11 +161,14 @@ type GetProfileResponse struct {
 }
 
 func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
+	const op = "userservice.GetProfile"
+
 	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
 		log.Println("Service Profile:", err)
 
-		return GetProfileResponse{}, err
+		return GetProfileResponse{},
+			richerror.New(op).WithErr(err).WithMetaData(map[string]any{"req": req})
 	}
 
 	return GetProfileResponse{Name: user.Name}, nil

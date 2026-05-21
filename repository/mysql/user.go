@@ -6,6 +6,8 @@ import (
 	"log"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
+	"github.com/SoroushBeigi/knowledge-game/pkg/errmessage"
+	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
 )
 
 func (db *MySQLDB) IsPhoneNumberUnique(pn string) (bool, error) {
@@ -40,18 +42,32 @@ func (db *MySQLDB) Register(u entity.User) (entity.User, error) {
 }
 
 func (db *MySQLDB) GetUserByPhoneNumber(pn string) (entity.User, error) {
+	const op = "sql.GetUserByPhoneNumber"
 	row := db.db.QueryRow(`SELECT * FROM users WHERE phone_number = ?`, pn)
 	user, err := scanUser(row)
 
 	if err != nil {
-		log.Printf("DB Error IsPhoneNumberUnique: %v\n", err)
-		return entity.User{}, fmt.Errorf("Error reading from Database")
+		if err == sql.ErrNoRows {
+
+			return entity.User{},
+				richerror.New(op).
+					WithErr(err).
+					WithMessage(errmessage.ErrorMsgNotFound).
+					WithCode(richerror.NotFoundCode)
+		}
+
+		return entity.User{},
+			richerror.New(op).
+				WithErr(err).
+				WithMessage(errmessage.ErrorMsgUnexpected).
+				WithCode(richerror.UnexpectedCode)
 	}
 
 	return user, nil
 }
 
 func (db *MySQLDB) GetUserByID(id uint) (entity.User, error) {
+	const op = "sql.GetUserByID"
 	user := entity.User{}
 
 	row := db.db.QueryRow(`SELECT * FROM users WHERE id = ?`, id)
@@ -59,11 +75,18 @@ func (db *MySQLDB) GetUserByID(id uint) (entity.User, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("DB Error IsPhoneNumberUnique ErrNoRows: %v\n", err)
-			return entity.User{}, fmt.Errorf("Record not found")
+			return entity.User{},
+				richerror.New(op).
+					WithErr(err).
+					WithMessage(errmessage.ErrorMsgNotFound).
+					WithCode(richerror.NotFoundCode)
 		}
-		log.Printf("DB Error IsPhoneNumberUnique: %v\n", err)
-		return entity.User{}, fmt.Errorf("Error reading from Database")
+
+		return entity.User{},
+			richerror.New(op).
+				WithErr(err).
+				WithMessage(errmessage.ErrorMsgUnexpected).
+				WithCode(richerror.UnexpectedCode)
 	}
 
 	return user, nil
@@ -73,7 +96,7 @@ func scanUser(row *sql.Row) (entity.User, error) {
 	var createdAt []uint8
 	var user entity.User
 
-	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Password, &createdAt)
+	err := row.Scan(&user.ID, &user.Name, &user.PhoneNumber, &createdAt, &user.Password)
 
 	return user, err
 }
