@@ -12,6 +12,7 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/service/authservice"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
 	"github.com/SoroushBeigi/knowledge-game/transport/httpserver"
+	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
 	"github.com/joho/godotenv"
 )
 
@@ -38,8 +39,9 @@ func main() {
 			RefreshSubject:    RefreshTokenSubject,
 		},
 	}
-	authSvc, userSvc := setupServices(cfg)
-	server := httpserver.New(cfg, authSvc, userSvc)
+	authSvc, userSvc, uv := setupServices(cfg)
+
+	server := httpserver.New(cfg, authSvc, userSvc, uv)
 
 	server.Serve()
 
@@ -57,11 +59,13 @@ func mainTestDB() {
 	fmt.Println(isUnique, err)
 }
 
-func setupServices(cfg config.Config) (authservice.Service, userservice.Service) {
+func setupServices(cfg config.Config) (authservice.Service, userservice.Service, uservalidator.Validator) {
 	auth := authservice.New(cfg.Auth)
 	mysqlRepo := mysql.New()
 	user := userservice.New(mysqlRepo, auth)
 
-	return *auth, *user
+	uv := uservalidator.New(mysqlRepo)
+
+	return *auth, *user, *uv
 
 }

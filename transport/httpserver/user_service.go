@@ -16,6 +16,11 @@ func (s Server) userRegister(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if err := s.userValidator.ValidateRegisterRequest(req); err != nil {
+		msg, code := httpmessage.CodeAndMessage(err)
+		return echo.NewHTTPError(code, msg)
+	}
+
 	user, err := s.userSvc.Register(req)
 	if err != nil {
 		msg, code := httpmessage.CodeAndMessage(err)

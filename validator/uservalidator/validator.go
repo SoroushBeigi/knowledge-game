@@ -26,13 +26,13 @@ func (v Validator) ValidateRegisterRequest(req dto.RegisterRequest) error {
 	const op = "uservalidator.ValidateRegisterRequest"
 
 	if err := validation.ValidateStruct(&req,
-		validation.Field(&req.Name, validation.Required, validation.Length(3, 50)),
-		validation.Field(&req.Password, validation.Required, validation.Match(regexp.MustCompile("^[a-zA-Z]{10,}$"))),
-		validation.Field(&req.PhoneNumber, validation.Required, validation.Match(regexp.MustCompile("^[0-9]{9}$")), validation.By(v.checkPhoneUniqueness)),
+		validation.Field(&req.Name, validation.Required, validation.Length(3, 50).Error(errmessage.NameLength)),
+		validation.Field(&req.Password, validation.Required, validation.Match(regexp.MustCompile("^[a-zA-Z0-9!@#$%^&*()]{8,}$")).Error(errmessage.PasswordLength)),
+		validation.Field(&req.PhoneNumber, validation.Required, validation.Match(regexp.MustCompile("^[0-9]{11}$")).Error(errmessage.PhoneNotValid), validation.By(v.checkPhoneUniqueness)),
 	); err != nil {
 		return richerror.
 			New(op).
-			WithMessage(errmessage.InvalidInput).
+			WithMessage(err.Error()).
 			WithCode(richerror.InvalidCode).
 			WithErr(err)
 	}
