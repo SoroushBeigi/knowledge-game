@@ -22,7 +22,7 @@ func New(repo Repository) *Validator {
 	return &Validator{repo: repo}
 }
 
-func (v Validator) ValidateRegisterRequest(req dto.RegisterRequest) error {
+func (v Validator) ValidateRegisterRequest(req dto.RegisterRequest) (map[string]string, error) {
 	const op = "uservalidator.ValidateRegisterRequest"
 
 	if err := validation.ValidateStruct(&req,
@@ -30,14 +30,24 @@ func (v Validator) ValidateRegisterRequest(req dto.RegisterRequest) error {
 		validation.Field(&req.Password, validation.Required, validation.Match(regexp.MustCompile("^[a-zA-Z0-9!@#$%^&*()]{8,}$")).Error(errmessage.PasswordLength)),
 		validation.Field(&req.PhoneNumber, validation.Required, validation.Match(regexp.MustCompile("^[0-9]{11}$")).Error(errmessage.PhoneNotValid), validation.By(v.checkPhoneUniqueness)),
 	); err != nil {
-		return richerror.
+
+		fieldErrors := make(map[string]string)
+		errV, ok := err.(validation.Errors)
+		if ok {
+			for key, value := range errV {
+				if value != nil {
+					fieldErrors[key] = value.Error()
+				}
+			}
+		}
+		return fieldErrors, richerror.
 			New(op).
-			WithMessage(err.Error()).
+			WithMessage(errmessage.InvalidInput).
 			WithCode(richerror.InvalidCode).
 			WithErr(err)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func (v Validator) checkPhoneUniqueness(value interface{}) error {
