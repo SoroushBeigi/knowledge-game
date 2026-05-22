@@ -11,6 +11,7 @@ import (
 )
 
 func (db *MySQLDB) IsPhoneNumberUnique(pn string) (bool, error) {
+	const op = "sql.IsPhoneNumberUnique"
 
 	row := db.db.QueryRow(`SELECT * FROM users WHERE phone_number = ?`, pn)
 	_, err := scanUser(row)
@@ -21,7 +22,10 @@ func (db *MySQLDB) IsPhoneNumberUnique(pn string) (bool, error) {
 
 	if err != nil {
 		log.Printf("DB Error IsPhoneNumberUnique: %v\n", err)
-		return false, fmt.Errorf("Error reading from Database")
+		return false, richerror.New(op).
+			WithErr(err).
+			WithMessage(errmessage.ErrorMsgUnexpected).
+			WithCode(richerror.UnexpectedCode)
 	}
 
 	return false, nil

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/SoroushBeigi/knowledge-game/dto"
 	"github.com/SoroushBeigi/knowledge-game/entity"
-	"github.com/SoroushBeigi/knowledge-game/pkg/phonenumber"
 	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
-	IsPhoneNumberUnique(pn string) (bool, error)
+	
 	Register(u entity.User) (entity.User, error)
 	GetUserByPhoneNumber(pn string) (entity.User, error)
 	GetUserByID(id uint) (entity.User, error)
@@ -32,50 +32,11 @@ type Service struct {
 	repo Repository
 }
 
-type RegisterRequest struct {
-	Name        string `json:"name"`
-	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password"`
-}
-
-type UserInfo struct {
-	ID          uint   `json:"id"`
-	PhoneNumber string `json:"phone_number"`
-	Name        string `json:"name"`
-}
-
-type RegisterResponse struct {
-	User UserInfo `json:"user"`
-}
-
-func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
-	if !phonenumber.IsValid(req.PhoneNumber) {
-		return RegisterResponse{}, fmt.Errorf("phone number is not valid: %v", req.PhoneNumber)
-	}
-
-	if isUnique, err := s.repo.IsPhoneNumberUnique(req.PhoneNumber); err != nil || !isUnique {
-		if err != nil {
-
-			return RegisterResponse{}, fmt.Errorf("unexpected error happened")
-		}
-
-		if !isUnique {
-
-			return RegisterResponse{}, fmt.Errorf("phone number is already registered: %v", req.PhoneNumber)
-		}
-	}
-
-	if len(req.Name) < 2 {
-		return RegisterResponse{}, fmt.Errorf("name should be at least 2 characters")
-	}
-
-	if len(req.Password) < 8 {
-		return RegisterResponse{}, fmt.Errorf("password should be at least 8 characters")
-	}
+func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
-		return RegisterResponse{}, fmt.Errorf("password should be less than 72 characters")
+		return dto.RegisterResponse{}, fmt.Errorf("password should be less than 72 characters")
 	}
 
 	user := entity.User{
@@ -87,10 +48,10 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	createdUser, err := s.repo.Register(user)
 	if err != nil {
-		return RegisterResponse{}, fmt.Errorf("unexpected error happened")
+		return dto.RegisterResponse{}, fmt.Errorf("unexpected error happened")
 	}
 
-	return RegisterResponse{User: UserInfo{
+	return dto.RegisterResponse{User: dto.UserInfo{
 		ID:          createdUser.ID,
 		PhoneNumber: createdUser.PhoneNumber,
 		Name:        createdUser.Name,
@@ -104,9 +65,9 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	User         UserInfo `json:"user"`
-	AccessToken  string   `json:"access_token"`
-	RefreshToken string   `json:"refresh_token"`
+	User         dto.UserInfo `json:"user"`
+	AccessToken  string       `json:"access_token"`
+	RefreshToken string       `json:"refresh_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -144,7 +105,7 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 
 	return LoginResponse{AccessToken: aToken,
 		RefreshToken: rToken,
-		User: UserInfo{
+		User: dto.UserInfo{
 			ID:          user.ID,
 			PhoneNumber: user.PhoneNumber,
 			Name:        user.Name,

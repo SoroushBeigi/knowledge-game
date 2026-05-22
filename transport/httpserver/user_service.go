@@ -3,13 +3,14 @@ package httpserver
 import (
 	"net/http"
 
+	"github.com/SoroushBeigi/knowledge-game/dto"
 	"github.com/SoroushBeigi/knowledge-game/pkg/httpmessage"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
 	"github.com/labstack/echo/v5"
 )
 
 func (s Server) userRegister(c *echo.Context) error {
-	var req userservice.RegisterRequest
+	var req dto.RegisterRequest
 	err := c.Bind(&req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())

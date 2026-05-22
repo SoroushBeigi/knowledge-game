@@ -9,7 +9,10 @@ require (
 	golang.org/x/crypto v0.51.0
 )
 
-require golang.org/x/time v0.14.0 // indirect
+require (
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
+)
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
