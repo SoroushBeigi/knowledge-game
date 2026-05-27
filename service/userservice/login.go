@@ -18,7 +18,7 @@ func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 	if err != nil {
 		log.Println("Service Login:", err)
 
-		return dto.LoginResponse{},
+		return dto.LoginResponse{}, 
 			richerror.New(op).
 				WithErr(err).
 				WithMetaData(map[string]any{"phone_number": req.PhoneNumber})

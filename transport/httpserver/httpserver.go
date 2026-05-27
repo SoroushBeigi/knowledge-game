@@ -7,25 +7,22 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/config"
 	"github.com/SoroushBeigi/knowledge-game/service/authservice"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
+	"github.com/SoroushBeigi/knowledge-game/transport/httpserver/userhandler"
 	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
 
 type Server struct {
-	config        config.Config
-	authSvc       authservice.Service
-	userSvc       userservice.Service
-	userValidator uservalidator.Validator
+	config      config.Config
+	userHandler userhandler.Handler
 }
 
-func New(config config.Config, auth authservice.Service, user userservice.Service, uv uservalidator.Validator) *Server {
+func New(config config.Config, authSvc authservice.Service, userSvc userservice.Service, uv uservalidator.Validator) *Server {
 
 	return &Server{
-		config:        config,
-		authSvc:       auth,
-		userSvc:       user,
-		userValidator: uv,
+		config:      config,
+		userHandler: *userhandler.New(authSvc, userSvc, uv),
 	}
 }
 
@@ -35,11 +32,7 @@ func (s Server) Serve() {
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	uGroup := e.Group("/users")
-
-	uGroup.POST("/register", s.userRegister)
-	uGroup.POST("/login", s.userLogin)
-	uGroup.GET("/profile", s.userProfile)
+	s.userHandler.SetRoutes(e)
 
 	log.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
 
