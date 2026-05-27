@@ -59,18 +59,9 @@ func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 
 }
 
-type LoginRequest struct {
-	PhoneNumber string `json:"phone_number"`
-	Password    string `json:"password"`
-}
 
-type LoginResponse struct {
-	User         dto.UserInfo `json:"user"`
-	AccessToken  string       `json:"access_token"`
-	RefreshToken string       `json:"refresh_token"`
-}
 
-func (s Service) Login(req LoginRequest) (LoginResponse, error) {
+func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
 	const op = "userservice.Login"
 	var defaultErr = errors.New("Phone number and password combination didn't work")
 
@@ -79,31 +70,31 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	if err != nil {
 		log.Println("Service Login:", err)
 
-		return LoginResponse{},
+		return dto.LoginResponse{},
 			richerror.New(op).
 				WithErr(err).
 				WithMetaData(map[string]any{"phone_number": req.PhoneNumber})
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return LoginResponse{}, defaultErr
+		return dto.LoginResponse{}, defaultErr
 	}
 
 	aToken, err := s.auth.CreateAccessToken(user)
 	if err != nil {
 		log.Println("Service Login, createToken ", err)
 
-		return LoginResponse{}, defaultErr
+		return dto.LoginResponse{}, defaultErr
 	}
 
 	rToken, err := s.auth.CreateRefreshToken(user)
 	if err != nil {
 		log.Println("Service Login, createToken ", err)
 
-		return LoginResponse{}, defaultErr
+		return dto.LoginResponse{}, defaultErr
 	}
 
-	return LoginResponse{AccessToken: aToken,
+	return dto.LoginResponse{AccessToken: aToken,
 		RefreshToken: rToken,
 		User: dto.UserInfo{
 			ID:          user.ID,
@@ -113,24 +104,16 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 	}, nil
 }
 
-type GetProfileRequest struct {
-	UserID uint `json:"id"`
-}
-
-type GetProfileResponse struct {
-	Name string `json:"name"`
-}
-
-func (s Service) GetProfile(req GetProfileRequest) (GetProfileResponse, error) {
+func (s Service) GetProfile(req dto.GetProfileRequest) (dto.GetProfileResponse, error) {
 	const op = "userservice.GetProfile"
 
 	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
 		log.Println("Service Profile:", err)
 
-		return GetProfileResponse{},
+		return dto.GetProfileResponse{},
 			richerror.New(op).WithErr(err).WithMetaData(map[string]any{"req": req})
 	}
 
-	return GetProfileResponse{Name: user.Name}, nil
+	return dto.GetProfileResponse{Name: user.Name}, nil
 }

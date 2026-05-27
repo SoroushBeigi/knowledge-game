@@ -5,7 +5,6 @@ import (
 
 	"github.com/SoroushBeigi/knowledge-game/dto"
 	"github.com/SoroushBeigi/knowledge-game/pkg/httpmessage"
-	"github.com/SoroushBeigi/knowledge-game/service/userservice"
 	"github.com/labstack/echo/v5"
 )
 
@@ -34,7 +33,7 @@ func (s Server) userRegister(c *echo.Context) error {
 }
 
 func (s Server) userLogin(c *echo.Context) error {
-	var req userservice.LoginRequest
+	var req dto.LoginRequest
 	err := c.Bind(&req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -57,7 +56,7 @@ func (s Server) userProfile(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
 
-	resp, err := s.userSvc.GetProfile(userservice.GetProfileRequest{UserID: claims.UserID})
+	resp, err := s.userSvc.GetProfile(dto.GetProfileRequest{UserID: claims.UserID})
 	if err != nil {
 		msg, code := httpmessage.CodeAndMessage(err)
 		return echo.NewHTTPError(code, msg)
