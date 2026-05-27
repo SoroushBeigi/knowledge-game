@@ -15,6 +15,14 @@ func (h Handler) userLogin(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
+	if fieldErrs, err := h.userValidator.ValidateLoginRequest(req); err != nil {
+		msg, code := httpmessage.CodeAndMessage(err)
+		return c.JSON(code, map[string]any{
+			"message":     msg,
+			"fieldErrors": fieldErrs,
+		})
+	}
+
 	resp, err := h.userSvc.Login(req)
 	if err != nil {
 		msg, code := httpmessage.CodeAndMessage(err)
