@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/config"
-	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
 	"github.com/SoroushBeigi/knowledge-game/service/authservice"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
@@ -45,18 +43,6 @@ func main() {
 
 	server.Serve()
 
-}
-
-func mainTestDB() {
-	mysqlRepo := mysql.New()
-
-	mysqlRepo.Register(entity.User{
-		PhoneNumber: "0910101",
-		Name:        "Ssss",
-	})
-
-	isUnique, err := mysqlRepo.IsPhoneNumberUnique("09010101")
-	fmt.Println(isUnique, err)
 }
 
 func setupServices(cfg config.Config) (authservice.Service, userservice.Service, uservalidator.Validator) {

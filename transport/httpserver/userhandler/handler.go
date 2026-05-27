@@ -7,15 +7,22 @@ import (
 )
 
 type Handler struct {
+	authConfig    authservice.Config
 	authSvc       authservice.Service
 	userSvc       userservice.Service
 	userValidator uservalidator.Validator
 }
 
-func New(authSvc authservice.Service, userSvc userservice.Service, uv uservalidator.Validator) *Handler {
+func New(authSvc authservice.Service,
+	userSvc userservice.Service,
+	uv uservalidator.Validator,
+	authConfig authservice.Config,
+) *Handler {
+
 	return &Handler{
 		authSvc:       authSvc,
 		userSvc:       userSvc,
 		userValidator: uv,
+		authConfig:   authConfig,
 	}
 }
