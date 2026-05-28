@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
+	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -55,6 +56,7 @@ func (s Service) CreateRefreshToken(user entity.User) (string, error) {
 }
 
 func (s Service) ParseToken(tokenStr string) (*Claims, error) {
+	const op = "authservice.ParseToken"
 	tokenStr = strings.Replace(tokenStr, "Bearer ", "", 1)
 
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (any, error) {
@@ -62,15 +64,20 @@ func (s Service) ParseToken(tokenStr string) (*Claims, error) {
 		return []byte(s.config.SignKey), nil
 	})
 
+	if err != nil {
+		log.Println(op, "error while parsing JWT:", err)
+		return nil, richerror.New(op).WithCode(richerror.ForbiddenCode).WithMessage(err.Error())
+	}
+
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		log.Printf("userID: %v, expires at: %v\n", claims.UserID, claims.ExpiresAt)
 
 		return claims, nil
 
 	} else {
-		log.Println("error while parsing JWT")
+		log.Println(op, "error while parsing JWT")
 
-		return nil, err
+		return nil, richerror.New(op).WithCode(richerror.ForbiddenCode).WithMessage(err.Error())
 	}
 
 }
