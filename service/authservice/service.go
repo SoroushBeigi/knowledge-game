@@ -30,11 +30,11 @@ func (c Claims) Validate() error {
 }
 
 type Config struct {
-	SignKey           string
-	AccessExpireTime  time.Duration
-	RefreshExpireTime time.Duration
-	AccessSubject     string
-	RefreshSubject    string
+	SignKey           string        `koanf:"sign_key"`
+	AccessExpireTime  time.Duration `koanf:"access_expire"`
+	RefreshExpireTime time.Duration `koanf:"refresh_expire"`
+	AccessSubject     string        `koanf:"access_subject"`
+	RefreshSubject    string        `koanf:"refresh_subject"`
 }
 type Service struct {
 	config Config

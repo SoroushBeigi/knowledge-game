@@ -1,0 +1,11 @@
+http_server:
+  port: 8080
+
+auth:
+  access_expire: 24h
+  refresh_expire: 168h
+
+mysql:
+  db_name: gameapp_db
+  host: localhost
+  port: 3308

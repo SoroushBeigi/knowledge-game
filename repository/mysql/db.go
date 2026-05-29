@@ -3,26 +3,41 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type Config struct {
+	Username string `koanf:"username"`
+	Password string `koanf:"password"`
+	Port     int    `koanf:"port"`
+	Host     string `koanf:"host"`
+	DBName   string `koanf:"db_name"`
+}
+
 type MySQLDB struct {
 	db *sql.DB
 }
 
-func New() *MySQLDB {
+func New(cfg Config) *MySQLDB {
+	
+	// user:password@tcp(host:port)/dbname
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+		cfg.Username,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+		cfg.DBName,
+	)
 
-	dbName := os.Getenv("MYSQL_DATABASE")
-	dbUser := os.Getenv("MYSQL_USER")
-	dbPass := os.Getenv("MYSQL_PASSWORD")
-	dbHostPort := os.Getenv("MYSQL_HOST_PORT")
-
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@(%s)/%s", dbUser, dbPass, dbHostPort, dbName))
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		panic(fmt.Errorf("cannot open mysql db"))
+		panic(fmt.Errorf("cannot open mysql db: %w", err))
+	}
+
+	if err := db.Ping(); err != nil {
+		panic(fmt.Errorf("cannot connect to mysql db: %w", err))
 	}
 
 	db.SetConnMaxLifetime(time.Minute * 3)
