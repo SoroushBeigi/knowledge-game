@@ -4,7 +4,7 @@ CREATE TABLE `access_controls`(
     `actor_id` VARCHAR(255) NOT NULL UNIQUE,
     `actor_type` ENUM('role', 'user') NOT NULL, 
     `permission_id` INT NOT NULL,
-    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`)
 );
 
