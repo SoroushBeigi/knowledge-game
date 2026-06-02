@@ -1,22 +1,22 @@
 package userhandler
 
 import (
-	"github.com/SoroushBeigi/knowledge-game/service/authservice"
+	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
 	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
 )
 
 type Handler struct {
-	authConfig    authservice.Config
-	authSvc       authservice.Service
+	authConfig    authnservice.Config
+	authSvc       authnservice.Service
 	userSvc       userservice.Service
 	userValidator uservalidator.Validator
 }
 
-func New(authSvc authservice.Service,
+func New(authSvc authnservice.Service,
 	userSvc userservice.Service,
 	uv uservalidator.Validator,
-	authConfig authservice.Config,
+	authConfig authnservice.Config,
 ) *Handler {
 
 	return &Handler{

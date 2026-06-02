@@ -20,8 +20,13 @@ type MySQLDB struct {
 	db *sql.DB
 }
 
+func (m *MySQLDB) DB() *sql.DB {
+
+	return m.db
+}
+
 func New(cfg Config) *MySQLDB {
-	
+
 	// user:password@tcp(host:port)/dbname
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
 		cfg.Username,

@@ -3,7 +3,11 @@ package main
 import (
 	"github.com/SoroushBeigi/knowledge-game/config"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
-	"github.com/SoroushBeigi/knowledge-game/service/authservice"
+	"github.com/SoroushBeigi/knowledge-game/repository/mysql/mysqlac"
+	"github.com/SoroushBeigi/knowledge-game/repository/mysql/mysqluser"
+	"github.com/SoroushBeigi/knowledge-game/service/adminservice"
+	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
+	"github.com/SoroushBeigi/knowledge-game/service/authzservice"
 	"github.com/SoroushBeigi/knowledge-game/service/userservice"
 	"github.com/SoroushBeigi/knowledge-game/transport/httpserver"
 	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
@@ -12,18 +16,28 @@ import (
 func main() {
 	cfg := config.Load("config.yml")
 
-	authSvc, userSvc, uv := setupServices(*cfg)
+	authnSvc, userSvc, uv, admin, authzSvc := setupServices(*cfg)
 
-	server := httpserver.New(*cfg, authSvc, userSvc, uv)
+	server := httpserver.New(*cfg, *authnSvc, *userSvc, *uv, *admin, *authzSvc)
 
 	server.Serve()
 }
 
-func setupServices(cfg config.Config) (authservice.Service, userservice.Service, uservalidator.Validator) {
-	auth := authservice.New(cfg.Auth)
-	mysqlRepo := mysql.New(cfg.MySQL)
-	user := userservice.New(mysqlRepo, auth)
-	uv := uservalidator.New(mysqlRepo)
+func setupServices(cfg config.Config) (*authnservice.Service, *userservice.Service,
+	*uservalidator.Validator, *adminservice.Service, *authzservice.Service,
+) {
+	authN := authnservice.New(cfg.Auth)
 
-	return *auth, *user, *uv
+	mysqlRepo := mysql.New(cfg.MySQL)
+	userMysql := mysqluser.New(mysqlRepo)
+	acMysql := mysqlac.New(mysqlRepo)
+
+	authZ := authzservice.New(acMysql)
+
+	user := userservice.New(userMysql, authN)
+	admin := adminservice.New()
+
+	uv := uservalidator.New(userMysql)
+
+	return authN, user, uv, admin, authZ
 }

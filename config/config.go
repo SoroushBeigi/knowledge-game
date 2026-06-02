@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
-	"github.com/SoroushBeigi/knowledge-game/service/authservice"
+	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
 )
 
 type HTTPServer struct {
@@ -10,7 +10,7 @@ type HTTPServer struct {
 }
 
 type Config struct {
-	Auth       authservice.Config `koanf:"auth"`
+	Auth       authnservice.Config `koanf:"auth"`
 	HTTPServer HTTPServer         `koanf:"http_server"`
 	MySQL      mysql.Config       `koanf:"mysql"`
 }

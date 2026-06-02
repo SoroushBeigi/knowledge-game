@@ -2,6 +2,7 @@ package errmessage
 
 const (
 	ErrorMsgNotFound   = "Not found"
+	ErrorMsgForbidden = "User is not allowed to do this action"
 	ErrorMsgUnexpected = "Unexpected error happened"
 	SomethingWentWrong = "Something went wrong"
 	PhoneNotUnique     = "Phone number is not unique"
