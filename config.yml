@@ -11,7 +11,7 @@ mysql:
   port: 3308
 
 matching:
-  waiting_timeout: 60s
+  waiting_timeout: 2m
 
 redis:
   host: localhost

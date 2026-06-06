@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/SoroushBeigi/knowledge-game/adapter/redis"
 	"github.com/SoroushBeigi/knowledge-game/config"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
@@ -20,6 +22,8 @@ import (
 func main() {
 	cfg := config.Load("config.yml")
 
+	fmt.Println(cfg)
+
 	server := httpserver.New(cfg, setupServices(cfg))
 
 	server.Serve()
@@ -37,7 +41,7 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	authZ := authzservice.New(acMysql)
 	user := userservice.New(userMysql, authN)
 	admin := adminservice.New()
-	matchingSvc := matchingservice.New(cfg.Matching,matchingrepo)
+	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo)
 
 	uv := uservalidator.New(userMysql)
 	mv := matchingvalidator.New()
