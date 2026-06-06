@@ -1,6 +1,13 @@
-version: '3.9'
-
 services:
+  gameapp-redis:
+    container_name: gameapp-redis
+    image: redis:8.6.4-trixie
+    ports:
+      - "6380:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: always
+    volumes:
+      - gameapp-redis:/data
   gameapp-database:
     image: mysql:9.7
     env_file:
@@ -20,3 +27,4 @@ services:
 
 volumes:
   dbdata:
+  gameapp-redis:

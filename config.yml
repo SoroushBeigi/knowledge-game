@@ -9,3 +9,11 @@ mysql:
   db_name: gameapp_db
   host: localhost
   port: 3308
+
+matching:
+  waiting_timeout: 60s
+
+redis:
+  host: localhost
+  port: 6380
+  db: 0

@@ -14,6 +14,7 @@ require (
 	github.com/knadh/koanf/v2 v2.3.4
 	github.com/labstack/echo-jwt/v5 v5.0.1
 	github.com/labstack/echo/v5 v5.1.1
+	github.com/redis/go-redis/v9 v9.20.0
 	golang.org/x/crypto v0.51.0
 )
 
@@ -28,4 +29,8 @@ require (
 	golang.org/x/time v0.14.0 // indirect
 )
 
-require filippo.io/edwards25519 v1.2.0 // indirect
+require (
+	filippo.io/edwards25519 v1.2.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+)

@@ -21,8 +21,11 @@ type Service struct {
 	repo   Repo
 }
 
-func New() *Service {
-	return &Service{}
+func New(conf Config, repo Repo) *Service {
+	return &Service{
+		config: conf,
+		repo:   repo,
+	}
 }
 
 func (s Service) AddToWaitingList(req dto.AddToWaitingListRequest) (dto.AddToWaitingListResponse, error) {
