@@ -34,15 +34,20 @@ func main() {
 	var wg sync.WaitGroup
 	done := make(chan bool)
 
-	wg.Add(1)
+	svc := setupServices(cfg)
+	server := httpserver.New(cfg, svc)
+
 	go func() {
-		sch := scheduler.New()
+		sch, err := scheduler.New(*svc.Matching)
+		if err != nil {
+			log.Println("FATAL: Scheduler ERR: ", err)
+		}
+
+		wg.Add(1)
 		sch.Start(done, &wg)
 	}()
 
-	server := httpserver.New(cfg, setupServices(cfg))
 	go func() {
-
 		server.Serve()
 
 	}()
@@ -64,6 +69,8 @@ func main() {
 
 	<-ctxWithTimeout.Done()
 
+	wg.Wait()
+	time.Sleep(2 * time.Second)
 }
 
 func setupServices(cfg *config.Config) *httpserver.Services {

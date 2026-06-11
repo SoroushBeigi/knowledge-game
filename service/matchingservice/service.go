@@ -40,3 +40,7 @@ func (s Service) AddToWaitingList(req dto.AddToWaitingListRequest) (dto.AddToWai
 	return dto.AddToWaitingListResponse{Timeout: s.config.WaitTimeout}, nil
 
 }
+
+func (s Service) MatchWaitedUsers(req dto.MatchWaitedUsersRequest) (dto.MatchWaitedUsersResponse, error) {
+	return dto.MatchWaitedUsersResponse{}, nil
+}
