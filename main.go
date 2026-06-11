@@ -1,7 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/adapter/redis"
 	"github.com/SoroushBeigi/knowledge-game/config"
@@ -9,6 +15,7 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql/mysqlac"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql/mysqluser"
 	"github.com/SoroushBeigi/knowledge-game/repository/redis/redismatching"
+	"github.com/SoroushBeigi/knowledge-game/scheduler"
 	"github.com/SoroushBeigi/knowledge-game/service/adminservice"
 	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
 	"github.com/SoroushBeigi/knowledge-game/service/authzservice"
@@ -24,9 +31,39 @@ func main() {
 
 	fmt.Println(cfg)
 
-	server := httpserver.New(cfg, setupServices(cfg))
+	var wg sync.WaitGroup
+	done := make(chan bool)
 
-	server.Serve()
+	wg.Add(1)
+	go func() {
+		sch := scheduler.New()
+		sch.Start(done, &wg)
+	}()
+
+	server := httpserver.New(cfg, setupServices(cfg))
+	go func() {
+
+		server.Serve()
+
+	}()
+
+	quitChan := make(chan os.Signal, 1)
+	signal.Notify(quitChan, os.Interrupt)
+	<-quitChan
+	ctx := context.Background()
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, cfg.Application.GracefulShutdownTimeout)
+	defer cancel()
+
+	if err := server.Shutdown(ctxWithTimeout); err != nil {
+		fmt.Println("http server shutdown error", err)
+	}
+
+	log.Println("Interrupt received. shutting down gracefully...")
+	done <- true
+	time.Sleep(cfg.Application.GracefulShutdownTimeout)
+
+	<-ctxWithTimeout.Done()
+
 }
 
 func setupServices(cfg *config.Config) *httpserver.Services {

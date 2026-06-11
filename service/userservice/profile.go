@@ -1,16 +1,17 @@
 package userservice
 
 import (
+	"context"
 	"log"
 
 	"github.com/SoroushBeigi/knowledge-game/dto"
 	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
 )
 
-func (s Service) GetProfile(req dto.GetProfileRequest) (dto.GetProfileResponse, error) {
+func (s Service) GetProfile(ctx context.Context, req dto.GetProfileRequest) (dto.GetProfileResponse, error) {
 	const op = "userservice.GetProfile"
 
-	user, err := s.repo.GetUserByID(req.UserID)
+	user, err := s.repo.GetUserByID(ctx, req.UserID)
 	if err != nil {
 		log.Println("Service Profile:", err)
 

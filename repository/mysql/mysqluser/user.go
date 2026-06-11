@@ -1,6 +1,7 @@
 package mysqluser
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -73,12 +74,12 @@ func (db *db) GetUserByPhoneNumber(pn string) (entity.User, error) {
 	return user, nil
 }
 
-func (db *db) GetUserByID(id uint) (entity.User, error) {
+func (db *db) GetUserByID(ctx context.Context, id uint) (entity.User, error) {
 	const op = "sql.GetUserByID"
 	user := entity.User{}
 	d := db.conn.DB()
 
-	row := d.QueryRow(`SELECT * FROM users WHERE id = ?`, id)
+	row := d.QueryRowContext(ctx, `SELECT * FROM users WHERE id = ?`, id)
 	user, err := scanUser(row)
 
 	if err != nil {
@@ -123,6 +124,6 @@ func parseRole(r string) entity.Role {
 	case "admin":
 		return entity.AdminRole
 	default:
-		return entity.UserRole 
+		return entity.UserRole
 	}
 }

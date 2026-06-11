@@ -16,10 +16,7 @@ func Load(ymlConfigPath string) *Config {
 	godotenv.Load(".env")
 	var k = koanf.New(".")
 
-	err := k.Load(confmap.Provider(map[string]any{
-		"auth.access_subject":  AccessTokenSubject,
-		"auth.refresh_subject": RefreshTokenSubject,
-	}, "."), nil)
+	err := k.Load(confmap.Provider(defaultConf, "."), nil)
 
 	if err != nil {
 		log.Fatalf("error loading default config: %v", err)

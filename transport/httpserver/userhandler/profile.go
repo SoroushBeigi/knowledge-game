@@ -12,7 +12,7 @@ import (
 func (h Handler) userProfile(c *echo.Context) error {
 	claims := claims.GetClaimsFromEchoContext(c)
 
-	resp, err := h.userSvc.GetProfile(dto.GetProfileRequest{UserID: claims.UserID})
+	resp, err := h.userSvc.GetProfile(c.Request().Context(), dto.GetProfileRequest{UserID: claims.UserID})
 	if err != nil {
 		msg, code := httpmessage.CodeAndMessage(err)
 		return echo.NewHTTPError(code, msg)

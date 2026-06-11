@@ -1,8 +1,10 @@
 package httpserver
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/SoroushBeigi/knowledge-game/config"
 	"github.com/SoroushBeigi/knowledge-game/transport/httpserver/adminhandler"
@@ -17,11 +19,14 @@ type Server struct {
 	userHandler     *userhandler.Handler
 	adminHandler    *adminhandler.Handler
 	matchingHandler *matchinghandler.Handler
+	Router          *echo.Echo
+	httpServer      *http.Server
 }
 
 func New(cfg *config.Config, svc *Services) *Server {
 
 	return &Server{
+		Router:          echo.New(),
 		config:          cfg,
 		userHandler:     userhandler.New(*svc.Authn, *svc.User, *svc.UserValidator, cfg.Auth),
 		adminHandler:    adminhandler.New(*svc.Authn, *svc.Admin, cfg.Auth, *svc.Authz),
@@ -30,15 +35,22 @@ func New(cfg *config.Config, svc *Services) *Server {
 }
 
 func (s *Server) Serve() {
-	e := echo.New()
 
-	e.Use(middleware.RequestLogger())
-	e.Use(middleware.Recover())
+	s.Router.Use(middleware.RequestLogger())
+	s.Router.Use(middleware.Recover())
 
-	s.userHandler.SetRoutes(e)
-	s.adminHandler.SetRoutes(e)
-	s.matchingHandler.SetRoutes(e)
+	s.userHandler.SetRoutes(s.Router)
+	s.adminHandler.SetRoutes(s.Router)
+	s.matchingHandler.SetRoutes(s.Router)
 
-	log.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HTTPServer.Port)))
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", s.config.HTTPServer.Port),
+		Handler: s.Router,
+	}
 
+	log.Fatal(s.httpServer.ListenAndServe())
+}
+
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
