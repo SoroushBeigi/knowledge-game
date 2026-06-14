@@ -28,9 +28,9 @@ func New(cfg *config.Config, svc *Services) *Server {
 	return &Server{
 		Router:          echo.New(),
 		config:          cfg,
-		userHandler:     userhandler.New(*svc.Authn, *svc.User, *svc.UserValidator, cfg.Auth),
+		userHandler:     userhandler.New(*svc.Authn, *svc.User, *svc.UserValidator, cfg.Auth, *svc.Presence),
 		adminHandler:    adminhandler.New(*svc.Authn, *svc.Admin, cfg.Auth, *svc.Authz),
-		matchingHandler: matchinghandler.New(*svc.Authn, *svc.Matching, *svc.MatchingValidator, cfg.Auth),
+		matchingHandler: matchinghandler.New(*svc.Authn, *svc.Matching, *svc.MatchingValidator, cfg.Auth, *svc.Presence),
 	}
 }
 

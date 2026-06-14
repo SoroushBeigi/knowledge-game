@@ -3,10 +3,10 @@ package redismatching
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/SoroushBeigi/knowledge-game/entity"
 	"github.com/SoroushBeigi/knowledge-game/pkg/richerror"
+	"github.com/SoroushBeigi/knowledge-game/pkg/timestamp"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -18,7 +18,7 @@ func (d DB) AddToWaitingList(userID uint, cat entity.Category) error {
 	client := d.adapter.Client()
 
 	_, err := client.ZAdd(context.Background(), fmt.Sprintf("%s:%s", waitingListPrefix, cat), redis.Z{
-		Score:  float64(time.Now().UnixMicro()),
+		Score:  float64(timestamp.Now()),
 		Member: fmt.Sprintf("%d", userID),
 	}).Result()
 
