@@ -21,3 +21,7 @@ redis:
 presence:
   expire: "60m"
   prefix: "presence"
+
+scheduler:
+  interval_second: 30
+ 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/SoroushBeigi/knowledge-game/adapter/redis"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
+	"github.com/SoroushBeigi/knowledge-game/scheduler"
 	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
 	"github.com/SoroushBeigi/knowledge-game/service/matchingservice"
 	"github.com/SoroushBeigi/knowledge-game/service/presenceservice"
@@ -26,4 +27,5 @@ type Config struct {
 	Matching    matchingservice.Config `koanf:"matching"`
 	Redis       redis.Config           `koanf:"redis"`
 	Presence    presenceservice.Config `koanf:"presence"`
+	Scheduler   scheduler.Config       `koanf:"scheduler"`
 }

@@ -40,7 +40,7 @@ func main() {
 	server := httpserver.New(cfg, svc)
 
 	go func() {
-		sch, err := scheduler.New(*svc.Matching)
+		sch, err := scheduler.New(*svc.Matching, cfg.Scheduler)
 		if err != nil {
 			log.Println("FATAL: Scheduler ERR: ", err)
 		}

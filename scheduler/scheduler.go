@@ -11,12 +11,17 @@ import (
 	"github.com/go-co-op/gocron/v2"
 )
 
+type Config struct {
+	IntervalSecond int `koanf:"interval_second"`
+}
+
 type Scheduler struct {
 	sch      gocron.Scheduler
 	matchSvc matchingservice.Service
+	config   Config
 }
 
-func New(matchSvc matchingservice.Service) (*Scheduler, error) {
+func New(matchSvc matchingservice.Service, conf Config) (*Scheduler, error) {
 	sch, err := gocron.NewScheduler()
 	if err != nil {
 		return nil, err
@@ -25,6 +30,7 @@ func New(matchSvc matchingservice.Service) (*Scheduler, error) {
 	return &Scheduler{
 		sch:      sch,
 		matchSvc: matchSvc,
+		config:   conf,
 	}, nil
 }
 
@@ -32,7 +38,7 @@ func (s Scheduler) Start(done <-chan bool, wg *sync.WaitGroup) {
 	defer wg.Done()
 	_, err := s.sch.NewJob(
 		gocron.DurationJob(
-			5*time.Second,
+			time.Second*time.Duration(s.config.IntervalSecond),
 		),
 		gocron.NewTask(s.MatchWaitedUsers),
 	)

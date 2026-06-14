@@ -27,5 +27,6 @@ func New(authSvc authnservice.Service,
 		userSvc:       userSvc,
 		userValidator: uv,
 		authConfig:    authConfig,
+		presenceSvc:   presenceSvc,
 	}
 }
