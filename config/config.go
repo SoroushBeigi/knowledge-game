@@ -7,6 +7,7 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
 	"github.com/SoroushBeigi/knowledge-game/service/authnservice"
 	"github.com/SoroushBeigi/knowledge-game/service/matchingservice"
+	"github.com/SoroushBeigi/knowledge-game/service/presenceservice"
 )
 
 type Application struct {
@@ -24,4 +25,5 @@ type Config struct {
 	MySQL       mysql.Config           `koanf:"mysql"`
 	Matching    matchingservice.Config `koanf:"matching"`
 	Redis       redis.Config           `koanf:"redis"`
+	Presence    presenceservice.Config `koanf:"presence"`
 }
