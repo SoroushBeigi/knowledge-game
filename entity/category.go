@@ -8,6 +8,10 @@ const (
 	SportsCat  = "sports"
 )
 
+func AllCats() []Category {
+	return []Category{TechCat, HistoryCat, SportsCat}
+}
+
 func (c Category) IsValid() bool {
 
 	switch c {

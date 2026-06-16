@@ -31,8 +31,6 @@ import (
 func main() {
 	cfg := config.Load("config.yml")
 
-	fmt.Println(cfg)
-
 	var wg sync.WaitGroup
 	done := make(chan bool)
 
@@ -88,7 +86,7 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	authZ := authzservice.New(acMysql)
 	user := userservice.New(userMysql, authN)
 	admin := adminservice.New()
-	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo)
+	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo,nil)
 	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
 
 	uv := uservalidator.New(userMysql)

@@ -36,5 +36,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/thoas/go-funk v0.9.3 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 )
