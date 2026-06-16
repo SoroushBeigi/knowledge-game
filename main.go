@@ -82,12 +82,13 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	matchingrepo := redismatching.New(redisAdapter)
 	presenceRepo := redispresence.New(redisAdapter)
 
+	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
 	authN := authnservice.New(cfg.Auth)
 	authZ := authzservice.New(acMysql)
 	user := userservice.New(userMysql, authN)
 	admin := adminservice.New()
-	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo,nil)
-	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
+	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo,presenceSvc)
+	
 
 	uv := uservalidator.New(userMysql)
 	mv := matchingvalidator.New()
