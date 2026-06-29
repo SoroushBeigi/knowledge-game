@@ -10,3 +10,13 @@ func DoesExist(list []uint, value uint) bool {
 
 	return false
 }
+
+func Uint64toUint(numbers []uint64) []uint {
+	uintList := make([]uint, 0)
+
+	for _, num := range numbers {
+		uintList = append(uintList, uint(num))
+	}
+
+	return uintList
+}
