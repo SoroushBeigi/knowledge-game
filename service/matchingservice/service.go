@@ -73,7 +73,7 @@ func (s Service) match(ctx context.Context, cat entity.Category, wg *sync.WaitGr
 
 	defer wg.Done()
 
-	waitingMembers, err := s.repo.GetWaitingListByCategory(ctx, entity.HistoryCat)
+	waitingMembers, err := s.repo.GetWaitingListByCategory(ctx, entity.TechCat)
 
 	if err != nil {
 		log.Println("match service error for cat: ", cat)

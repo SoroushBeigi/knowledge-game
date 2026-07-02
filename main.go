@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	presenceClient "github.com/SoroushBeigi/knowledge-game/adapter/presence"
 	"github.com/SoroushBeigi/knowledge-game/adapter/redis"
 	"github.com/SoroushBeigi/knowledge-game/config"
 	"github.com/SoroushBeigi/knowledge-game/repository/mysql"
@@ -27,7 +28,6 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/validator/matchingvalidator"
 	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
 	"google.golang.org/grpc"
-	presenceClient "github.com/SoroushBeigi/knowledge-game/adapter/presence"
 )
 
 func main() {
@@ -36,7 +36,13 @@ func main() {
 	var wg sync.WaitGroup
 	done := make(chan bool)
 
-	svc := setupServices(cfg)
+	conn, err := grpc.Dial(":8086", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
+	svc := setupServices(cfg, conn)
 	server := httpserver.New(cfg, svc)
 
 	go func() {
@@ -75,7 +81,7 @@ func main() {
 	time.Sleep(2 * time.Second)
 }
 
-func setupServices(cfg *config.Config) *httpserver.Services {
+func setupServices(cfg *config.Config, presenceConn *grpc.ClientConn) *httpserver.Services {
 	redisAdapter := redis.New(cfg.Redis)
 
 	mysqlRepo := mysql.New(cfg.MySQL)
@@ -83,15 +89,10 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	acMysql := mysqlac.New(mysqlRepo)
 	matchingrepo := redismatching.New(redisAdapter)
 	presenceRepo := redispresence.New(redisAdapter)
-	conn, err := grpc.Dial(":8086", grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
 
-	presenceAdapter := presenceClient.New(conn)
+	presenceAdapter := presenceClient.New(presenceConn)
+	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
 
-	
 	authN := authnservice.New(cfg.Auth)
 	authZ := authzservice.New(acMysql)
 	user := userservice.New(userMysql, authN)
@@ -101,8 +102,6 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	uv := uservalidator.New(userMysql)
 	mv := matchingvalidator.New()
 
-	
-
 	return &httpserver.Services{
 		Authn:             authN,
 		User:              user,
@@ -111,6 +110,6 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 		Authz:             authZ,
 		Matching:          matchingSvc,
 		MatchingValidator: mv,
-		Presence:          presenceAdapter,
+		Presence:          presenceSvc,
 	}
 }
