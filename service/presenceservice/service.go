@@ -44,7 +44,6 @@ func (s Service) UpsertPresence(ctx context.Context, req dto.UpsertPresenceReque
 }
 
 func (s Service) GetPresence(ctx context.Context, req dto.GetPresenceRequest) (dto.GetPresenceResponse, error) {
-
 	//TODO: implement!!!
 	//TODO: implement!!!
 	return dto.GetPresenceResponse{Items: []dto.GetPresenceItem{

@@ -15,6 +15,7 @@ func main() {
 	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
 
 	server := presenceserver.New(*presenceSvc)
+	
 
 	server.Start()
 }

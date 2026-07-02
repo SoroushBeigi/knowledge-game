@@ -40,10 +40,9 @@ func (s Server) Start() {
 		log.Fatal("grpc listener error")
 	}
 
-	presenceServer := Server{}
 	grpcServer := grpc.NewServer()
 
-	presence.RegisterPresenceServiceServer(grpcServer, &presenceServer)
+	presence.RegisterPresenceServiceServer(grpcServer, &s)
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatal("grpc serve error")

@@ -81,9 +81,13 @@ func (s Service) match(ctx context.Context, cat entity.Category, wg *sync.WaitGr
 		return
 	}
 
-	userIDs := make([]uint, len(waitingMembers))
+	userIDs := make([]uint, 0)
 	for _, wm := range waitingMembers {
 		userIDs = append(userIDs, wm.UserID)
+	}
+
+	if len(userIDs) < 2 {
+		return
 	}
 
 	presList, err := s.presenceClient.GetPresence(ctx, dto.GetPresenceRequest{UserIDs: userIDs})
