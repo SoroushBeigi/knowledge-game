@@ -26,6 +26,8 @@ import (
 	"github.com/SoroushBeigi/knowledge-game/transport/httpserver"
 	"github.com/SoroushBeigi/knowledge-game/validator/matchingvalidator"
 	"github.com/SoroushBeigi/knowledge-game/validator/uservalidator"
+	"google.golang.org/grpc"
+	presenceClient "github.com/SoroushBeigi/knowledge-game/adapter/presence"
 )
 
 func main() {
@@ -81,17 +83,25 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 	acMysql := mysqlac.New(mysqlRepo)
 	matchingrepo := redismatching.New(redisAdapter)
 	presenceRepo := redispresence.New(redisAdapter)
+	conn, err := grpc.Dial(":8086", grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
 
-	presenceSvc := presenceservice.New(cfg.Presence, presenceRepo)
+	presenceAdapter := presenceClient.New(conn)
+
+	
 	authN := authnservice.New(cfg.Auth)
 	authZ := authzservice.New(acMysql)
 	user := userservice.New(userMysql, authN)
 	admin := adminservice.New()
-	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo,presenceSvc)
-	
+	matchingSvc := matchingservice.New(cfg.Matching, matchingrepo, presenceAdapter)
 
 	uv := uservalidator.New(userMysql)
 	mv := matchingvalidator.New()
+
+	
 
 	return &httpserver.Services{
 		Authn:             authN,
@@ -101,6 +111,6 @@ func setupServices(cfg *config.Config) *httpserver.Services {
 		Authz:             authZ,
 		Matching:          matchingSvc,
 		MatchingValidator: mv,
-		Presence:          presenceSvc,
+		Presence:          presenceAdapter,
 	}
 }

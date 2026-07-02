@@ -10,8 +10,8 @@ type GetPresenceResponse struct {
 	Items []GetPresenceItem
 }
 
-func (gpResponse GetPresenceResponse) ToGrpc() *presence.GerPresenceResponse {
-	r := &presence.GerPresenceResponse{}
+func (gpResponse GetPresenceResponse) ToGrpc() *presence.GetPresenceResponse {
+	r := &presence.GetPresenceResponse{}
 
 	for _, item := range gpResponse.Items {
 		r.Items = append(r.Items, &presence.GetPresenceItem{

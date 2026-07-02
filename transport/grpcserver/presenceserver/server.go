@@ -25,7 +25,7 @@ func New(svc presenceservice.Service) *Server {
 	}
 }
 
-func (s Server) GetPresence(ctx context.Context, req *presence.GetPresenceRequest) (*presence.GerPresenceResponse, error) {
+func (s Server) GetPresence(ctx context.Context, req *presence.GetPresenceRequest) (*presence.GetPresenceResponse, error) {
 	resp, err := s.svc.GetPresence(ctx, dto.GetPresenceRequest{UserIDs: slice.Uint64toUint(req.GetUserIds())})
 	if err != nil {
 		return nil, err

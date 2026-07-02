@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PresenceServiceClient interface {
-	GetPresence(ctx context.Context, in *GetPresenceRequest, opts ...grpc.CallOption) (*GerPresenceResponse, error)
+	GetPresence(ctx context.Context, in *GetPresenceRequest, opts ...grpc.CallOption) (*GetPresenceResponse, error)
 }
 
 type presenceServiceClient struct {
@@ -37,9 +37,9 @@ func NewPresenceServiceClient(cc grpc.ClientConnInterface) PresenceServiceClient
 	return &presenceServiceClient{cc}
 }
 
-func (c *presenceServiceClient) GetPresence(ctx context.Context, in *GetPresenceRequest, opts ...grpc.CallOption) (*GerPresenceResponse, error) {
+func (c *presenceServiceClient) GetPresence(ctx context.Context, in *GetPresenceRequest, opts ...grpc.CallOption) (*GetPresenceResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GerPresenceResponse)
+	out := new(GetPresenceResponse)
 	err := c.cc.Invoke(ctx, PresenceService_GetPresence_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (c *presenceServiceClient) GetPresence(ctx context.Context, in *GetPresence
 // All implementations must embed UnimplementedPresenceServiceServer
 // for forward compatibility.
 type PresenceServiceServer interface {
-	GetPresence(context.Context, *GetPresenceRequest) (*GerPresenceResponse, error)
+	GetPresence(context.Context, *GetPresenceRequest) (*GetPresenceResponse, error)
 	mustEmbedUnimplementedPresenceServiceServer()
 }
 
@@ -62,7 +62,7 @@ type PresenceServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPresenceServiceServer struct{}
 
-func (UnimplementedPresenceServiceServer) GetPresence(context.Context, *GetPresenceRequest) (*GerPresenceResponse, error) {
+func (UnimplementedPresenceServiceServer) GetPresence(context.Context, *GetPresenceRequest) (*GetPresenceResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPresence not implemented")
 }
 func (UnimplementedPresenceServiceServer) mustEmbedUnimplementedPresenceServiceServer() {}

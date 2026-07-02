@@ -65,27 +65,27 @@ func (x *GetPresenceRequest) GetUserIds() []uint64 {
 	return nil
 }
 
-type GerPresenceResponse struct {
+type GetPresenceResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Items         []*GetPresenceItem     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GerPresenceResponse) Reset() {
-	*x = GerPresenceResponse{}
+func (x *GetPresenceResponse) Reset() {
+	*x = GetPresenceResponse{}
 	mi := &file_presence_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GerPresenceResponse) String() string {
+func (x *GetPresenceResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GerPresenceResponse) ProtoMessage() {}
+func (*GetPresenceResponse) ProtoMessage() {}
 
-func (x *GerPresenceResponse) ProtoReflect() protoreflect.Message {
+func (x *GetPresenceResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_presence_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -97,12 +97,12 @@ func (x *GerPresenceResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GerPresenceResponse.ProtoReflect.Descriptor instead.
-func (*GerPresenceResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetPresenceResponse.ProtoReflect.Descriptor instead.
+func (*GetPresenceResponse) Descriptor() ([]byte, []int) {
 	return file_presence_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GerPresenceResponse) GetItems() []*GetPresenceItem {
+func (x *GetPresenceResponse) GetItems() []*GetPresenceItem {
 	if x != nil {
 		return x.Items
 	}
@@ -168,13 +168,13 @@ const file_presence_proto_rawDesc = "" +
 	"\x0epresence.proto\x12\bpresence\"/\n" +
 	"\x12GetPresenceRequest\x12\x19\n" +
 	"\buser_ids\x18\x01 \x03(\x04R\auserIds\"F\n" +
-	"\x13GerPresenceResponse\x12/\n" +
+	"\x13GetPresenceResponse\x12/\n" +
 	"\x05items\x18\x01 \x03(\v2\x19.presence.GetPresenceItemR\x05items\"H\n" +
 	"\x0fGetPresenceItem\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x04R\x06userId\x12\x1c\n" +
 	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp2]\n" +
 	"\x0fPresenceService\x12J\n" +
-	"\vGetPresence\x12\x1c.presence.GetPresenceRequest\x1a\x1d.presence.GerPresenceResponseBCZAgithub.com/SoroushBeigi/knowledge-game/rpcmessage/golang/presenceb\x06proto3"
+	"\vGetPresence\x12\x1c.presence.GetPresenceRequest\x1a\x1d.presence.GetPresenceResponseBCZAgithub.com/SoroushBeigi/knowledge-game/rpcmessage/golang/presenceb\x06proto3"
 
 var (
 	file_presence_proto_rawDescOnce sync.Once
@@ -191,13 +191,13 @@ func file_presence_proto_rawDescGZIP() []byte {
 var file_presence_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_presence_proto_goTypes = []any{
 	(*GetPresenceRequest)(nil),  // 0: presence.GetPresenceRequest
-	(*GerPresenceResponse)(nil), // 1: presence.GerPresenceResponse
+	(*GetPresenceResponse)(nil), // 1: presence.GetPresenceResponse
 	(*GetPresenceItem)(nil),     // 2: presence.GetPresenceItem
 }
 var file_presence_proto_depIdxs = []int32{
-	2, // 0: presence.GerPresenceResponse.items:type_name -> presence.GetPresenceItem
+	2, // 0: presence.GetPresenceResponse.items:type_name -> presence.GetPresenceItem
 	0, // 1: presence.PresenceService.GetPresence:input_type -> presence.GetPresenceRequest
-	1, // 2: presence.PresenceService.GetPresence:output_type -> presence.GerPresenceResponse
+	1, // 2: presence.PresenceService.GetPresence:output_type -> presence.GetPresenceResponse
 	2, // [2:3] is the sub-list for method output_type
 	1, // [1:2] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

@@ -20,3 +20,13 @@ func Uint64toUint(numbers []uint64) []uint {
 
 	return uintList
 }
+
+func UintToUint64(numbers []uint) []uint64 {
+	uint64List := make([]uint64, 0)
+
+	for _, num := range numbers {
+		uint64List = append(uint64List, uint64(num))
+	}
+
+	return uint64List
+}
